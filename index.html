@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polyglot Academy - Gestão Escolar</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-blue: #0d6efd;
+            --dark-blue: #0a58ca;
+            --light-blue: #cfe2ff;
+            --sidebar-bg: #0b3d78;
+            --sidebar-hover: #0a2f5c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            padding-top: 20px;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .sidebar .brand {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar .brand i {
+            margin-right: 10px;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.8rem 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: white;
+            background-color: var(--sidebar-hover);
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 1.5rem;
+        }
+
+        .page-container {
+            display: none;
+        }
+
+        .page-container.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        }
+
+        .card-header {
+            background-color: var(--primary-blue);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-blue);
+            border-color: var(--dark-blue);
+        }
+
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .login-card .brand {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary-blue);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========= LOGIN PAGE ========= -->
+    <div id="login-page" class="login-container">
+        <div class="card login-card">
+            <div class="brand">
+                <i class="fas fa-graduation-cap fa-2x"></i>
+                <h2>Polyglot Academy</h2>
+            </div>
+            <form id="login-form">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuário</label>
+                    <input type="text" class="form-control" id="username" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Senha</label>
+                    <input type="password" class="form-control" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                <div class="mt-3 text-center small text-muted">
+                    <p>Demo: <strong>admin/admin</strong> ou <strong>user/user</strong></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========= MAIN APP ========= -->
+    <div id="main-app" style="display: none;">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="brand">
+                <i class="fas fa-graduation-cap"></i>
+                Polyglot Academy
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" data-page="dashboard">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-page="pedagogico">
+                        <i class="fas fa-book-open"></i> Pedagógico
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-page="secretaria">
+                        <i class="fas fa-school"></i> Secretaria
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-page="administrativo">
+                        <i class="fas fa-cogs"></i> Administrativo
+                    </a>
+                </li>
+                <li class="nav-item mt-auto">
+                    <a class="nav-link text-danger" href="#" id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <nav class="navbar navbar-expand-lg navbar-light">
+                <div class="container-fluid">
+                    <span class="navbar-brand mb-0 h1">Bem-vindo, <span id="user-name"></span></span>
+                    <span class="text-muted" id="user-role"></span>
+                </div>
+            </nav>
+
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page-container active">
+                <h2 class="mb-4">Dashboard</h2>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <i class="fas fa-users fa-3x text-primary mb-2"></i>
+                                <h5 class="card-title">Total de Alunos</h5>
+                                <p class="card-text fs-2" id="total-alunos">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <i class="fas fa-chalkboard-teacher fa-3x text-success mb-2"></i>
+                                <h5 class="card-title">Total de Professores</h5>
+                                <p class="card-text fs-2" id="total-professores">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <i class="fas fa-door-open fa-3x text-warning mb-2"></i>
+                                <h5 class="card-title">Total de Turmas</h5>
+                                <p class="card-text fs-2" id="total-turmas">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <i class="fas fa-book fa-3x text-info mb-2"></i>
+                                <h5 class="card-title">Total de Disciplinas</h5>
+                                <p class="card-text fs-2" id="total-disciplinas">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pedagogico Page -->
+            <div id="pedagogico" class="page-container">
+                <h2 class="mb-4">Gestão Pedagógica</h2>
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-door-open"></i> Turmas</span>
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#turmaModal" onclick="openTurmaModal()">
+                                    <i class="fas fa-plus"></i> Nova Turma
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table id="turmas-table" class="table table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nome</th>
+                                            <th>Série</th>
+                                            <th>Ano Letivo</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-book"></i> Disciplinas</span>
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#disciplinaModal" onclick="openDisciplinaModal()">
+                                    <i class="fas fa-plus"></i> Nova Disciplina
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table id="disciplinas-table" class="table table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nome</th>
+                                            <th>Carga Horária</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secretaria Page -->
+            <div id="secretaria" class="page-container">
+                <h2 class="mb-4">Gestão da Secretaria</h2>
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-users"></i> Alunos</span>
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#alunoModal" onclick="openAlunoModal()">
+                                    <i class="fas fa-plus"></i> Novo Aluno
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table id="alunos-table" class="table table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nome</th>
+                                            <th>Data Nasc.</th>
+                                            <th>Responsável</th>
+                                            <th>Contato</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-chalkboard-teacher"></i> Professores</span>
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#professorModal" onclick="openProfessorModal()">
+                                    <i class="fas fa-plus"></i> Novo Professor
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table id="professores-table" class="table table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nome</th>
+                                            <th>Disciplina</th>
+                                            <th>Email</th>
+                                            <th>Contato</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Administrativo Page -->
+            <div id="administrativo" class="page-container">
+                <h2 class="mb-4">Gestão Administrativa</h2>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <span><i class="fas fa-chart-bar"></i> Relatório: Alunos por Turma (Simulado)</span>
+                            </div>
+                            <div class="card-body">
+                                <p>Este relatório simula a associação de alunos a turmas para demonstrar a funcionalidade de exportação de dados complexos.</p>
+                                <div class="mt-4">
+                                    <table id="relatorio-alunos-turma-table" class="table table-striped table-hover" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Nome do Aluno</th>
+                                                <th>Nome da Turma</th>
+                                                <th>Série</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ========= MODALS ========= -->
+    <!-- Modal Aluno -->
+    <div class="modal fade" id="alunoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cadastrar/Editar Aluno</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="aluno-form">
+                        <input type="hidden" id="aluno-id">
+                        <div class="mb-3">
+                            <label for="aluno-nome" class="form-label">Nome Completo</label>
+                            <input type="text" class="form-control" id="aluno-nome" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="aluno-nascimento" class="form-label">Data de Nascimento</label>
+                            <input type="date" class="form-control" id="aluno-nascimento" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="aluno-responsavel" class="form-label">Responsável</label>
+                            <input type="text" class="form-control" id="aluno-responsavel" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="aluno-contato" class="form-label">Contato</label>
+                            <input type="tel" class="form-control" id="aluno-contato" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAluno()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Professor -->
+    <div class="modal fade" id="professorModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cadastrar/Editar Professor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="professor-form">
+                        <input type="hidden" id="professor-id">
+                        <div class="mb-3">
+                            <label for="professor-nome" class="form-label">Nome Completo</label>
+                            <input type="text" class="form-control" id="professor-nome" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="professor-disciplina" class="form-label">Disciplina Principal</label>
+                            <input type="text" class="form-control" id="professor-disciplina" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="professor-email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="professor-email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="professor-contato" class="form-label">Contato</label>
+                            <input type="tel" class="form-control" id="professor-contato" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProfessor()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Turma -->
+    <div class="modal fade" id="turmaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cadastrar/Editar Turma</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="turma-form">
+                        <input type="hidden" id="turma-id">
+                        <div class="mb-3">
+                            <label for="turma-nome" class="form-label">Nome da Turma</label>
+                            <input type="text" class="form-control" id="turma-nome" placeholder="Ex: 1º Ano A" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="turma-serie" class="form-label">Série</label>
+                            <input type="text" class="form-control" id="turma-serie" placeholder="Ex: 1º Ano do Ensino Fundamental" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="turma-ano" class="form-label">Ano Letivo</label>
+                            <input type="number" class="form-control" id="turma-ano" value="2024" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveTurma()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Disciplina -->
+    <div class="modal fade" id="disciplinaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cadastrar/Editar Disciplina</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="disciplina-form">
+                        <input type="hidden" id="disciplina-id">
+                        <div class="mb-3">
+                            <label for="disciplina-nome" class="form-label">Nome da Disciplina</label>
+                            <input type="text" class="form-control" id="disciplina-nome" placeholder="Ex: Matemática" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="disciplina-carga" class="form-label">Carga Horária (h/a)</label>
+                            <input type="number" class="form-control" id="disciplina-carga" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDisciplina()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========= SCRIPTS ========= -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Toastify JS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <script>
+        // --- GLOBAL STATE ---
+        let db;
+        let currentUser = null;
+        let alunosTable, professoresTable, turmasTable, disciplinasTable, relatorioTable;
+
+        // --- INDEXEDDB SETUP ---
+        const DB_NAME = 'PolyglotAcademyDB';
+        const DB_VERSION = 1;
+        const STORES = {
+            alunos: 'alunos',
+            professores: 'professores',
+            turmas: 'turmas',
+            disciplinas: 'disciplinas'
+        };
+
+        function initDB() {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+            request.onerror = (event) => {
+                console.error("IndexedDB error:", event.target.error);
+                showToast("Erro ao inicializar o banco de dados.", "error");
+            };
+
+            request.onsuccess = (event) => {
+                db = event.target.result;
+                console.log("IndexedDB initialized successfully.");
+                checkAuthAndSeedData();
+            };
+
+            request.onupgradeneeded = (event) => {
+                db = event.target.result;
+                if (!db.objectStoreNames.contains(STORES.alunos)) {
+                    db.createObjectStore(STORES.alunos, { keyPath: 'id', autoIncrement: true });
+                }
+                if (!db.objectStoreNames.contains(STORES.professores)) {
+                    db.createObjectStore(STORES.professores, { keyPath: 'id', autoIncrement: true });
+                }
+                if (!db.objectStoreNames.contains(STORES.turmas)) {
+                    db.createObjectStore(STORES.turmas, { keyPath: 'id', autoIncrement: true });
+                }
+                if (!db.objectStoreNames.contains(STORES.disciplinas)) {
+                    db.createObjectStore(STORES.disciplinas, { keyPath: 'id', autoIncrement: true });
+                }
+            };
+        }
+
+        // --- CRUD GENERIC FUNCTIONS ---
+        function addData(storeName, data) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.add(data);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function getAllData(storeName) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function getDataById(storeName, id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.get(id);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function updateData(storeName, data) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.put(data);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function deleteData(storeName, id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.delete(id);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // --- AUTHENTICATION ---
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if ((username === 'admin' && password === 'admin') || (username === 'user' && password === 'user')) {
+                currentUser = { username, role: username === 'admin' ? 'admin' : 'user' };
+                localStorage.setItem('polyglotUser', JSON.stringify(currentUser));
+                showApp();
+            } else {
+                Swal.fire('Erro!', 'Usuário ou senha inválidos.', 'error');
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('polyglotUser');
+            currentUser = null;
+            showLogin();
+        });
+
+        function checkAuthAndSeedData() {
+            const savedUser = localStorage.getItem('polyglotUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showApp();
+            } else {
+                showLogin();
+            }
+            seedInitialData();
+        }
+
+        function showApp() {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('user-name').textContent = currentUser.username;
+            document.getElementById('user-role').textContent = `(${currentUser.role === 'admin' ? 'Administrador' : 'Usuário Comum'})`;
+        }
+
+        function showLogin() {
+            document.getElementById('login-page').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
+        }
+
+        // --- UI & NAVIGATION ---
+        document.querySelectorAll('.sidebar .nav-link[data-page]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetPage = e.currentTarget.dataset.page;
+                switchPage(targetPage);
+                document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+            });
+        });
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.page-container').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // --- DATATABLES INITIALIZATION ---
+        function initDataTables() {
+            const commonOptions = {
+                responsive: true,
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json",
+                },
+                dom: 'Bfrtip',
+                buttons: [
+                    'copy', 'csv', 'excel', 'pdf', 'print'
+                ]
+            };
+
+            // Alunos Table
+            alunosTable = $('#alunos-table').DataTable({
+                ...commonOptions,
+                columns: [
+                    { data: 'id' },
+                    { data: 'nome' },
+                    { data: 'nascimento' },
+                    { data: 'responsavel' },
+                    { data: 'contato' },
+                    {
+                        data: null,
+                        render: (data, type, row) => `
+                            <button class="btn btn-sm btn-warning" onclick="editAluno(${row.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteAluno(${row.id})"><i class="fas fa-trash"></i></button>
+                        `
+                    }
+                ]
+            });
+
+            // Professores Table
+            professoresTable = $('#professores-table').DataTable({
+                ...commonOptions,
+                columns: [
+                    { data: 'id' },
+                    { data: 'nome' },
+                    { data: 'disciplina' },
+                    { data: 'email' },
+                    { data: 'contato' },
+                    {
+                        data: null,
+                        render: (data, type, row) => {
+                            const actions = `<button class="btn btn-sm btn-warning" onclick="editProfessor(${row.id})"><i class="fas fa-edit"></i></button>`;
+                            if (currentUser.role === 'admin') {
+                                return `${actions} <button class="btn btn-sm btn-danger" onclick="deleteProfessor(${row.id})"><i class="fas fa-trash"></i></button>`;
+                            }
+                            return actions;
+                        }
+                    }
+                ]
+            });
+
+            // Turmas Table
+            turmasTable = $('#turmas-table').DataTable({
+                ...commonOptions,
+                columns: [
+                    { data: 'id' },
+                    { data: 'nome' },
+                    { data: 'serie' },
+                    { data: 'anoLetivo' },
+                    {
+                        data: null,
+                        render: (data, type, row) => `
+                            <button class="btn btn-sm btn-warning" onclick="editTurma(${row.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteTurma(${row.id})"><i class="fas fa-trash"></i></button>
+                        `
+                    }
+                ]
+            });
+
+            // Disciplinas Table
+            disciplinasTable = $('#disciplinas-table').DataTable({
+                ...commonOptions,
+                columns: [
+                    { data: 'id' },
+                    { data: 'nome' },
+                    { data: 'cargaHoraria' },
+                    {
+                        data: null,
+                        render: (data, type, row) => `
+                            <button class="btn btn-sm btn-warning" onclick="editDisciplina(${row.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteDisciplina(${row.id})"><i class="fas fa-trash"></i></button>
+                        `
+                    }
+                ]
+            });
+
+            // Relatorio Table
+            relatorioTable = $('#relatorio-alunos-turma-table').DataTable({
+                ...commonOptions,
+                data: [], // Will be populated dynamically
+                columns: [
+                    { title: "Nome do Aluno", data: "alunoNome" },
+                    { title: "Nome da Turma", data: "turmaNome" },
+                    { title: "Série", data: "turmaSerie" }
+                ]
+            });
+        }
+
+        // --- LOAD DATA INTO TABLES ---
+        async function loadAlunos() {
+            const alunos = await getAllData(STORES.alunos);
+            alunosTable.clear().rows.add(alunos).draw();
+        }
+        async function loadProfessores() {
+            const professores = await getAllData(STORES.professores);
+            professoresTable.clear().rows.add(professores).draw();
+        }
+        async function loadTurmas() {
+            const turmas = await getAllData(STORES.turmas);
+            turmasTable.clear().rows.add(turmas).draw();
+        }
+        async function loadDisciplinas() {
+            const disciplinas = await getAllData(STORES.disciplinas);
+            disciplinasTable.clear().rows.add(disciplinas).draw();
+        }
+        async function loadDashboardCounts() {
+            const [alunos, professores, turmas, disciplinas] = await Promise.all([
+                getAllData(STORES.alunos),
+                getAllData(STORES.professores),
+                getAllData(STORES.turmas),
+                getAllData(STORES.disciplinas)
+            ]);
+            document.getElementById('total-alunos').textContent = alunos.length;
+            document.getElementById('total-professores').textContent = professores.length;
+            document.getElementById('total-turmas').textContent = turmas.length;
+            document.getElementById('total-disciplinas').textContent = disciplinas.length;
+        }
+        async function loadRelatorio() {
+            const alunos = await getAllData(STORES.alunos);
+            const turmas = await getAllData(STORES.turmas);
+            
+            const reportData = alunos.map(aluno => {
+                const randomTurma = turmas.length > 0 ? turmas[Math.floor(Math.random() * turmas.length)] : { nome: 'Não atribuído', serie: 'N/A' };
+                return {
+                    alunoNome: aluno.nome,
+                    turmaNome: randomTurma.nome,
+                    turmaSerie: randomTurma.serie
+                };
+            });
+
+            relatorioTable.clear().rows.add(reportData).draw();
+        }
+
+
+        // --- MODAL & FORM HANDLERS (ALUNO) ---
+        function openAlunoModal() {
+            document.getElementById('aluno-form').reset();
+            document.getElementById('aluno-id').value = '';
+        }
+        async function editAluno(id) {
+            const aluno = await getDataById(STORES.alunos, id);
+            if (aluno) {
+                document.getElementById('aluno-id').value = aluno.id;
+                document.getElementById('aluno-nome').value = aluno.nome;
+                document.getElementById('aluno-nascimento').value = aluno.nascimento;
+                document.getElementById('aluno-responsavel').value = aluno.responsavel;
+                document.getElementById('aluno-contato').value = aluno.contato;
+                new bootstrap.Modal(document.getElementById('alunoModal')).show();
+            }
+        }
+        async function saveAluno() {
+            const id = document.getElementById('aluno-id').value;
+            const alunoData = {
+                nome: document.getElementById('aluno-nome').value,
+                nascimento: document.getElementById('aluno-nascimento').value,
+                responsavel: document.getElementById('aluno-responsavel').value,
+                contato: document.getElementById('aluno-contato').value,
+            };
+            if (id) {
+                alunoData.id = parseInt(id);
+                await updateData(STORES.alunos, alunoData);
+                showToast("Aluno atualizado com sucesso!");
+            } else {
+                await addData(STORES.alunos, alunoData);
+                showToast("Aluno cadastrado com sucesso!");
+            }
+            bootstrap.Modal.getInstance(document.getElementById('alunoModal')).hide();
+            loadAlunos();
+            loadDashboardCounts();
+        }
+        async function deleteAluno(id) {
+            const result = await Swal.fire({
+                title: 'Tem certeza?',
+                text: "Você não poderá reverter isso!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, deletar!'
+            });
+            if (result.isConfirmed) {
+                await deleteData(STORES.alunos, id);
+                showToast("Aluno deletado com sucesso!", "success");
+                loadAlunos();
+                loadDashboardCounts();
+            }
+        }
+
+        // --- MODAL & FORM HANDLERS (PROFESSOR) ---
+        function openProfessorModal() {
+            document.getElementById('professor-form').reset();
+            document.getElementById('professor-id').value = '';
+        }
+        async function editProfessor(id) {
+            const professor = await getDataById(STORES.professores, id);
+            if (professor) {
+                document.getElementById('professor-id').value = professor.id;
+                document.getElementById('professor-nome').value = professor.nome;
+                document.getElementById('professor-disciplina').value = professor.disciplina;
+                document.getElementById('professor-email').value = professor.email;
+                document.getElementById('professor-contato').value = professor.contato;
+                new bootstrap.Modal(document.getElementById('professorModal')).show();
+            }
+        }
+        async function saveProfessor() {
+            const id = document.getElementById('professor-id').value;
+            const professorData = {
+                nome: document.getElementById('professor-nome').value,
+                disciplina: document.getElementById('professor-disciplina').value,
+                email: document.getElementById('professor-email').value,
+                contato: document.getElementById('professor-contato').value,
+            };
+            if (id) {
+                professorData.id = parseInt(id);
+                await updateData(STORES.professores, professorData);
+                showToast("Professor atualizado com sucesso!");
+            } else {
+                await addData(STORES.professores, professorData);
+                showToast("Professor cadastrado com sucesso!");
+            }
+            bootstrap.Modal.getInstance(document.getElementById('professorModal')).hide();
+            loadProfessores();
+            loadDashboardCounts();
+        }
+        async function deleteProfessor(id) {
+            if (currentUser.role !== 'admin') {
+                showToast("Você não tem permissão para esta ação.", "error");
+                return;
+            }
+            const result = await Swal.fire({
+                title: 'Tem certeza?',
+                text: "Você não poderá reverter isso!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, deletar!'
+            });
+            if (result.isConfirmed) {
+                await deleteData(STORES.professores, id);
+                showToast("Professor deletado com sucesso!", "success");
+                loadProfessores();
+                loadDashboardCounts();
+            }
+        }
+
+        // --- MODAL & FORM HANDLERS (TURMA) ---
+        function openTurmaModal() {
+            document.getElementById('turma-form').reset();
+            document.getElementById('turma-id').value = '';
+        }
+        async function editTurma(id) {
+            const turma = await getDataById(STORES.turmas, id);
+            if (turma) {
+                document.getElementById('turma-id').value = turma.id;
+                document.getElementById('turma-nome').value = turma.nome;
+                document.getElementById('turma-serie').value = turma.serie;
+                document.getElementById('turma-ano').value = turma.anoLetivo;
+                new bootstrap.Modal(document.getElementById('turmaModal')).show();
+            }
+        }
+        async function saveTurma() {
+            const id = document.getElementById('turma-id').value;
+            const turmaData = {
+                nome: document.getElementById('turma-nome').value,
+                serie: document.getElementById('turma-serie').value,
+                anoLetivo: document.getElementById('turma-ano').value,
+            };
+            if (id) {
+                turmaData.id = parseInt(id);
+                await updateData(STORES.turmas, turmaData);
+                showToast("Turma atualizada com sucesso!");
+            } else {
+                await addData(STORES.turmas, turmaData);
+                showToast("Turma cadastrada com sucesso!");
+            }
+            bootstrap.Modal.getInstance(document.getElementById('turmaModal')).hide();
+            loadTurmas();
+            loadDashboardCounts();
+        }
+        async function deleteTurma(id) {
+            const result = await Swal.fire({
+                title: 'Tem certeza?',
+                text: "Você não poderá reverter isso!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, deletar!'
+            });
+            if (result.isConfirmed) {
+                await deleteData(STORES.turmas, id);
+                showToast("Turma deletada com sucesso!", "success");
+                loadTurmas();
+                loadDashboardCounts();
+            }
+        }
+
+        // --- MODAL & FORM HANDLERS (DISCIPLINA) ---
+        function openDisciplinaModal() {
+            document.getElementById('disciplina-form').reset();
+            document.getElementById('disciplina-id').value = '';
+        }
+        async function editDisciplina(id) {
+            const disciplina = await getDataById(STORES.disciplinas, id);
+            if (disciplina) {
+                document.getElementById('disciplina-id').value = disciplina.id;
+                document.getElementById('disciplina-nome').value = disciplina.nome;
+                document.getElementById('disciplina-carga').value = disciplina.cargaHoraria;
+                new bootstrap.Modal(document.getElementById('disciplinaModal')).show();
+            }
+        }
+        async function saveDisciplina() {
+            const id = document.getElementById('disciplina-id').value;
+            const disciplinaData = {
+                nome: document.getElementById('disciplina-nome').value,
+                cargaHoraria: document.getElementById('disciplina-carga').value,
+            };
+            if (id) {
+                disciplinaData.id = parseInt(id);
+                await updateData(STORES.disciplinas, disciplinaData);
+                showToast("Disciplina atualizada com sucesso!");
+            } else {
+                await addData(STORES.disciplinas, disciplinaData);
+                showToast("Disciplina cadastrada com sucesso!");
+            }
+            bootstrap.Modal.getInstance(document.getElementById('disciplinaModal')).hide();
+            loadDisciplinas();
+            loadDashboardCounts();
+        }
+        async function deleteDisciplina(id) {
+            const result = await Swal.fire({
+                title: 'Tem certeza?',
+                text: "Você não poderá reverter isso!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, deletar!'
+            });
+            if (result.isConfirmed) {
+                await deleteData(STORES.disciplinas, id);
+                showToast("Disciplina deletada com sucesso!", "success");
+                loadDisciplinas();
+                loadDashboardCounts();
+            }
+        }
+
+        // --- UTILITY FUNCTIONS ---
+        function showToast(message, type = 'success') {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+                style: {
+                    background: type === 'success' ? "linear-gradient(to right, #00b09b, #96c93d)" : "linear-gradient(to right, #ff5f6d, #ffc371)",
+                },
+            }).showToast();
+        }
+
+        async function seedInitialData() {
+            const alunosCount = (await getAllData(STORES.alunos)).length;
+            if (alunosCount > 0) return; // Already seeded
+
+            const seedData = {
+                alunos: [
+                    { nome: 'Ana Silva', nascimento: '2015-03-10', responsavel: 'Maria Silva', contato: '(11) 98765-4321' },
+                    { nome: 'Bruno Costa', nascimento: '2014-07-22', responsavel: 'João Costa', contato: '(11) 91234-5678' },
+                    { nome: 'Carla Dias', nascimento: '2015-11-05', responsavel: 'Cláudia Dias', contato: '(11) 99876-5432' },
+                ],
+                professores: [
+                    { nome: 'Dr. Pedro Henrique', disciplina: 'Matemática', email: 'pedro.h@polyglot.com', contato: '(11) 97654-3210' },
+                    { nome: 'Profa. Juliana Martins', disciplina: 'Português', email: 'juliana.m@polyglot.com', contato: '(11) 96543-2109' },
+                ],
+                turmas: [
+                    { nome: '1º Ano A', serie: '1º Ano Ensino Fundamental', anoLetivo: 2024 },
+                    { nome: '2º Ano B', serie: '2º Ano Ensino Fundamental', anoLetivo: 2024 },
+                ],
+                disciplinas: [
+                    { nome: 'Matemática', cargaHoraria: 200 },
+                    { nome: 'Português', cargaHoraria: 200 },
+                    { nome: 'História', cargaHoraria: 100 },
+                    { nome: 'Geografia', cargaHoraria: 100 },
+                ]
+            };
+
+            for (const store in seedData) {
+                for (const item of seedData[store]) {
+                    await addData(store, item);
+                }
+            }
+            console.log("Initial data seeded.");
+        }
+
+        // --- INITIALIZATION ON PAGE LOAD ---
+        $(document).ready(function() {
+            initDB();
+            initDataTables();
+            
+            // Load data when switching pages to keep tables fresh
+            document.querySelector('[data-page="dashboard"]').addEventListener('click', loadDashboardCounts);
+            document.querySelector('[data-page="secretaria"]').addEventListener('click', () => { loadAlunos(); loadProfessores(); });
+            document.querySelector('[data-page="pedagogico"]').addEventListener('click', () => { loadTurmas(); loadDisciplinas(); });
+            document.querySelector('[data-page="administrativo"]').addEventListener('click', loadRelatorio);
+        });
+    </script>
+</body>
+</html>
