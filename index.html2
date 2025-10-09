@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polyglot Academy - Gestão Escolar</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-blue: #0d6efd;
+            --dark-blue: #0a58ca;
+            --light-blue: #cfe2ff;
+            --sidebar-bg: #0b3d78;
+            --sidebar-hover: #0a2f5c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+        }
+
+        /* --- RESPONSIVE SIDEBAR --- */
+        .sidebar {
+            height: 100vh;
+            background-color: var(--sidebar-bg);
+            padding-top: 20px;
+            z-index: 1045;
+            transition: all 0.3s;
+        }
+
+        .sidebar .brand {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar .brand i {
+            margin-right: 10px;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.8rem 1.5rem;
+            transition: all 0.2s;
+            border-radius: 0.25rem;
+            margin: 0.1rem 0.5rem;
+        }
+
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: white;
+            background-color: var(--sidebar-hover);
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* --- MAIN CONTENT AREA --- */
+        .main-content {
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        @media (min-width: 992px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 250px;
+            }
+            .main-content {
+                margin-left: 250px;
+            }
+        }
+        
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 1.5rem;
+        }
+
+        .page-container {
+            display: none;
+        }
+
+        .page-container.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            background-color: var(--primary-blue);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-blue);
+            border-color: var(--dark-blue);
+        }
+
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .login-card .brand {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary-blue);
+        }
+
+        .status-pendente { color: #dc3545; font-weight: bold; }
+        .status-pago { color: #198754; font-weight: bold; }
+        .status-ativa { color: #198754; font-weight: bold; }
+        
+        /* Schedule Grid */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 100px repeat(5, 1fr);
+            gap: 5px;
+            font-size: 0.9em;
+        }
+        .schedule-grid-header {
+            font-weight: bold;
+            background-color: var(--light-blue);
+            padding: 10px;
+            text-align: center;
+        }
+        .schedule-grid-cell {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 5px;
+            min-height: 60px;
+        }
+        .schedule-grid-item {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 4px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            font-size: 0.8em;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        /* Loading Spinner */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid var(--primary-blue);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- ========= LOGIN PAGE ========= -->
+    <div id="login-page" class="login-container">
+        <div class="card login-card">
+            <div class="brand">
+                <i class="fas fa-graduation-cap fa-2x"></i>
+                <h2>Polyglot Academy</h2>
+            </div>
+            <form id="login-form">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuário</label>
+                    <input type="text" class="form-control" id="username" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Senha</label>
+                    <input type="password" class="form-control" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                <div class="mt-3 text-center small text-muted">
+                    <p>Demo: <strong>admin/admin</strong> ou <strong>user/user</strong></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========= MAIN APP ========= -->
+    <div id="main-app" style="display: none;">
+        <!-- Mobile Top Navbar -->
+        <nav class="navbar navbar-light d-lg-none">
+            <div class="container-fluid">
+                <button class="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar">
+                    <i class="fas fa-bars fa-lg"></i>
+                </button>
+                <span class="navbar-brand mb-0 h1">Polyglot Academy</span>
+            </div>
+        </nav>
+
+        <!-- Mobile Sidebar (Offcanvas) -->
+        <div class="offcanvas offcanvas-start sidebar" tabindex="-1" id="mobileSidebar">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title brand text-white">
+                    <i class="fas fa-graduation-cap"></i>
+                    Polyglot Academy
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-page="dashboard">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-page="secretaria">
+                            <i class="fas fa-school"></i> Secretaria
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-page="pedagogico">
+                            <i class="fas fa-book-open"></i> Pedagógico
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-page="financeiro">
+                            <i class="fas fa-dollar-sign"></i> Conta Corrente
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-page="horarios">
+                            <i class="fas fa-clock"></i> Horários
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-page="administrativo">
+                            <i class="fas fa-cogs"></i> Administrativo
+                        </a>
+                    </li>
+                    <li class="nav-item mt-auto">
+                        <a class="nav-link text-danger" href="#" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Desktop Sidebar -->
+        <nav class="sidebar d-none d-lg-block">
+            <div class="brand">
+                <i class="fas fa-graduation-cap"></i>
+                Polyglot Academy
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" data-page="dashboard">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-page="secretaria">
+                        <i class="fas fa-school"></i> Secretaria
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-page="pedagogico">
+                        <i class="fas fa-book-open"></i> Pedagógico
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-page="financeiro">
+                        <i class="fas fa-dollar-sign"></i> Conta Corrente
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-page="horarios">
+                        <i class="fas fa-clock"></i> Horários
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-page="administrativo">
+                        <i class="fas fa-cogs"></i> Administrativo
+                    </a>
+                </li>
+                <li class="nav-item mt-auto">
+                    <a class="nav-link text-danger" href="#" id="logout-btn-desktop">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <nav class="navbar navbar-expand-lg navbar-light d-none d-lg-flex">
+                <div class="container-fluid">
+                    <span class="navbar-brand mb-0 h1">Bem-vindo, <span id="user-name"></span></span>
+                    <span class="text-muted" id="user-role"></span>
+                </div>
+            </nav>
+
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page-container active">
+                <h2 class="mb-4">Dashboard</h2>
+                <div class="row">
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <i class="fas fa-users fa-3x text-primary mb-2"></i>
+                                <h5 class="card-title">Total de Alunos</h5>
+                                <p class="card-text fs-2" id="total-alunos">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <i class="fas fa-chalkboard-teacher fa-3x text-success mb-2"></i>
+                                <h5 class="card-title">Total de Professores</h5>
+                                <p class="card-text fs-2" id="total-professores">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <i class="fas fa-door-open fa-3x text-warning mb-2"></i>
+                                <h5 class="card-title">Total de Turmas</h5>
+                                <p class="card-text fs-2" id="total-turmas">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <i class="fas fa-book fa-3x text-info mb-2"></i>
+                                <h5 class="card-title">Total de Disciplinas</h5>
+                                <p class="card-text fs-2" id="total-disciplinas">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secretaria Page -->
+            <div id="secretaria" class="page-container">
+                <h2 class="mb-4">Gestão da Secretaria</h2>
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-users"></i> Alunos</span>
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#alunoModal" onclick="openAlunoModal()">
+                                    <i class="fas fa-plus"></i> Novo Aluno
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table id="alunos-table" class="table table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nome</th>
+                                            <th>Data Nasc.</th>
+                                            <th>Responsável</th>
+                                            <th>Contato</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 mb-4">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-user-plus"></i> Matrículas</span>
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#matriculaModal" onclick="openMatriculaModal()">
+                                    <i class="fas fa-plus"></i> Nova Matrícula
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table id="matriculas-table" class="table table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Aluno</th>
+                                            <th>Turma</th>
+                                            <th>Data</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-chalkboard-teacher"></i> Professores</span>
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#professorModal" onclick="openProfessorModal()">
+                                    <i class="fas fa-plus"></i> Novo Professor
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table id="professores-table" class="table table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nome</th>
+                                            <th>Disciplina</th>
+                                            <th>Email</th>
+                                            <th>Contato</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pedagogico Page -->
+            <div id="pedagogico" class="page-container">
+                <h2 class="mb-4">Gestão Pedagógica</h2>
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-clipboard-list"></i> Lista de Presença</span>
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#presencaModal" onclick="openPresencaModal()">
+                                    <i class="fas fa-plus"></i> Registrar Presença
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table id="presenca-table" class="table table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Data</th>
+                                            <th>Turma</th>
+                                            <th>Presentes</th>
+                                            <th>Ausentes</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-file-alt"></i> Planos de Aula</span>
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#planoAulaModal" onclick="openPlanoAulaModal()">
+                                    <i class="fas fa-plus"></i> Novo Plano
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table id="planosAula-table" class="table table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Data</th>
+                                            <th>Turma</th>
+                                            <th>Disciplina</th>
+                                            <th>Professor</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financeiro Page -->
+            <div id="financeiro" class="page-container">
+                <h2 class="mb-4">Conta Corrente do Aluno</h2>
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-receipt"></i> Lançamentos Financeiros</span>
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#financeiroModal" onclick="openFinanceiroModal()">
+                                    <i class="fas fa-plus"></i> Novo Lançamento
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table id="financeiro-table" class="table table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Aluno</th>
+                                            <th>Descrição</th>
+                                            <th>Valor</th>
+                                            <th>Vencimento</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <span><i class="fas fa-exclamation-triangle"></i> Mapa de Devedores</span>
+                            </div>
+                            <div class="card-body">
+                                <table id="devedores-table" class="table table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Aluno</th>
+                                            <th>Responsável</th>
+                                            <th>Contato</th>
+                                            <th>Valor Total Devido</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Horarios Page -->
+            <div id="horarios" class="page-container">
+                <h2 class="mb-4">Gestão de Horários</h2>
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-calendar-plus"></i> Gerenciar Grade de Horários</span>
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#horarioModal" onclick="openHorarioModal()">
+                                    <i class="fas fa-plus"></i> Adicionar Horário
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table id="horarios-table" class="table table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Turma</th>
+                                            <th>Professor</th>
+                                            <th>Disciplina</th>
+                                            <th>Dia</th>
+                                            <th>Horário</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <span><i class="fas fa-th"></i> Visualização da Grade de Horários</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="schedule-grid-container" class="schedule-grid">
+                                    <!-- Grid will be populated by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Administrativo Page -->
+            <div id="administrativo" class="page-container">
+                <h2 class="mb-4">Gestão Administrativa</h2>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <span><i class="fas fa-chart-bar"></i> Relatório: Alunos por Turma (Simulado)</span>
+                            </div>
+                            <div class="card-body">
+                                <p>Este relatório simula a associação de alunos a turmas para demonstrar a funcionalidade de exportação de dados complexos.</p>
+                                <div class="mt-4">
+                                    <table id="relatorio-alunos-turma-table" class="table table-striped table-hover" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Nome do Aluno</th>
+                                                <th>Nome da Turma</th>
+                                                <th>Série</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ========= MODALS ========= -->
+    <!-- Modal Aluno -->
+    <div class="modal fade" id="alunoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cadastrar/Editar Aluno</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="aluno-form">
+                        <input type="hidden" id="aluno-id">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="aluno-nome" class="form-label">Nome Completo</label>
+                                <input type="text" class="form-control" id="aluno-nome" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="aluno-nascimento" class="form-label">Data de Nascimento</label>
+                                <input type="date" class="form-control" id="aluno-nascimento" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="aluno-responsavel" class="form-label">Responsável</label>
+                                <input type="text" class="form-control" id="aluno-responsavel" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="aluno-contato" class="form-label">Contato</label>
+                                <input type="tel" class="form-control" id="aluno-contato" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAluno()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Professor -->
+    <div class="modal fade" id="professorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cadastrar/Editar Professor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="professor-form">
+                        <input type="hidden" id="professor-id">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="professor-nome" class="form-label">Nome Completo</label>
+                                <input type="text" class="form-control" id="professor-nome" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="professor-disciplina" class="form-label">Disciplina Principal</label>
+                                <input type="text" class="form-control" id="professor-disciplina" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="professor-email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="professor-email" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="professor-contato" class="form-label">Contato</label>
+                                <input type="tel" class="form-control" id="professor-contato" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProfessor()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Matricula -->
+    <div class="modal fade" id="matriculaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nova Matrícula</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="matricula-form">
+                        <div class="mb-3">
+                            <label for="matricula-aluno" class="form-label">Aluno</label>
+                            <select class="form-select" id="matricula-aluno" required>
+                                <option value="" selected disabled>Selecione um aluno...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="matricula-turma" class="form-label">Turma</label>
+                            <select class="form-select" id="matricula-turma" required>
+                                <option value="" selected disabled>Selecione uma turma...</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveMatricula()">Matricular</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Presenca -->
+    <div class="modal fade" id="presencaModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Registrar Presença</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="presenca-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="presenca-turma" class="form-label">Turma</label>
+                                <select class="form-select" id="presenca-turma" required onchange="loadAlunosForPresenca()">
+                                    <option value="" selected disabled>Selecione uma turma...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="presenca-data" class="form-label">Data</label>
+                                <input type="date" class="form-control" id="presenca-data" required>
+                            </div>
+                        </div>
+                        <hr>
+                        <h6>Marcar Presença</h6>
+                        <div id="presenca-alunos-list">
+                            <!-- Checkboxes will be populated here -->
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="savePresenca()">Salvar Presença</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Plano de Aula -->
+    <div class="modal fade" id="planoAulaModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cadastrar/Editar Plano de Aula</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="planoAula-form">
+                        <input type="hidden" id="planoAula-id">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="planoAula-turma" class="form-label">Turma</label>
+                                <select class="form-select" id="planoAula-turma" required>
+                                    <option value="" selected disabled>Selecione uma turma...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="planoAula-data" class="form-label">Data da Aula</label>
+                                <input type="date" class="form-control" id="planoAula-data" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="planoAula-conteudo" class="form-label">Conteúdo Programático</label>
+                            <textarea class="form-control" id="planoAula-conteudo" rows="4" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="planoAula-objetivos" class="form-label">Objetivos de Aprendizagem</label>
+                            <textarea class="form-control" id="planoAula-objetivos" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="savePlanoAula()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Financeiro -->
+    <div class="modal fade" id="financeiroModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cadastrar/Editar Lançamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="financeiro-form">
+                        <input type="hidden" id="financeiro-id">
+                        <div class="mb-3">
+                            <label for="financeiro-aluno" class="form-label">Aluno</label>
+                            <select class="form-select" id="financeiro-aluno" required>
+                                <option value="" selected disabled>Selecione um aluno...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="financeiro-descricao" class="form-label">Descrição</label>
+                            <input type="text" class="form-control" id="financeiro-descricao" placeholder="Ex: Mensalidade Março/2024" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="financeiro-valor" class="form-label">Valor (R$)</label>
+                            <input type="number" class="form-control" id="financeiro-valor" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="financeiro-vencimento" class="form-label">Data de Vencimento</label>
+                            <input type="date" class="form-control" id="financeiro-vencimento" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="financeiro-status" class="form-label">Status</label>
+                            <select class="form-select" id="financeiro-status" required>
+                                <option value="Pendente">Pendente</option>
+                                <option value="Pago">Pago</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveFinanceiro()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Horario -->
+    <div class="modal fade" id="horarioModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar Horário</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="horario-form">
+                        <div class="mb-3">
+                            <label for="horario-turma" class="form-label">Turma</label>
+                            <select class="form-select" id="horario-turma" required>
+                                <option value="" selected disabled>Selecione uma turma...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="horario-professor" class="form-label">Professor</label>
+                            <select class="form-select" id="horario-professor" required>
+                                <option value="" selected disabled>Selecione um professor...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="horario-disciplina" class="form-label">Disciplina</label>
+                            <input type="text" class="form-control" id="horario-disciplina" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="horario-dia" class="form-label">Dia da Semana</label>
+                                <select class="form-select" id="horario-dia" required>
+                                    <option value="Segunda">Segunda</option>
+                                    <option value="Terça">Terça</option>
+                                    <option value="Quarta">Quarta</option>
+                                    <option value="Quinta">Quinta</option>
+                                    <option value="Sexta">Sexta</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="horario-horario" class="form-label">Horário</label>
+                                <input type="text" class="form-control" id="horario-horario" placeholder="Ex: 08:00 - 09:00" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveHorario()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- ========= SCRIPTS ========= -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Toastify JS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <script>
+        // --- GLOBAL STATE ---
+        let db;
+        let currentUser = null;
+        let tables = {};
+
+        // --- INDEXEDDB SETUP ---
+        const DB_NAME = 'PolyglotAcademyDB';
+        const DB_VERSION = 3; // Incremented version for new stores
+        const STORES = {
+            alunos: 'alunos',
+            professores: 'professores',
+            turmas: 'turmas',
+            disciplinas: 'disciplinas',
+            matriculas: 'matriculas',
+            financeiro: 'financeiro',
+            planosAula: 'planosAula',
+            presenca: 'presenca',
+            horarios: 'horarios'
+        };
+
+        function initDB() {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onerror = (event) => console.error("IndexedDB error:", event.target.error);
+            request.onsuccess = (event) => {
+                db = event.target.result;
+                console.log("IndexedDB initialized successfully.");
+                checkAuthAndSeedData();
+            };
+            request.onupgradeneeded = (event) => {
+                db = event.target.result;
+                // Create stores if they don't exist
+                Object.values(STORES).forEach(storeName => {
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        db.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
+                    }
+                });
+            };
+        }
+
+        // --- CRUD GENERIC FUNCTIONS ---
+        function addData(storeName, data) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.add(data);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+        function getAllData(storeName) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+        function getDataById(storeName, id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.get(id);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+        function updateData(storeName, data) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.put(data);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+        function deleteData(storeName, id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.delete(id);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // --- AUTHENTICATION ---
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if ((username === 'admin' && password === 'admin') || (username === 'user' && password === 'user')) {
+                currentUser = { username, role: username === 'admin' ? 'admin' : 'user' };
+                localStorage.setItem('polyglotUser', JSON.stringify(currentUser));
+                showApp();
+            } else {
+                Swal.fire('Erro!', 'Usuário ou senha inválidos.', 'error');
+            }
+        });
+        document.getElementById('logout-btn').addEventListener('click', (e) => { e.preventDefault(); performLogout(); });
+        document.getElementById('logout-btn-desktop').addEventListener('click', (e) => { e.preventDefault(); performLogout(); });
+        function performLogout() {
+            localStorage.removeItem('polyglotUser');
+            currentUser = null;
+            showLogin();
+        }
+
+        function checkAuthAndSeedData() {
+            const savedUser = localStorage.getItem('polyglotUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showApp();
+            } else {
+                showLogin();
+            }
+            seedInitialData();
+        }
+        function showApp() {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('user-name').textContent = currentUser.username;
+            document.getElementById('user-role').textContent = `(${currentUser.role === 'admin' ? 'Administrador' : 'Usuário Comum'})`;
+        }
+        function showLogin() {
+            document.getElementById('login-page').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
+        }
+
+        // --- UI & NAVIGATION ---
+        document.querySelectorAll('.sidebar .nav-link[data-page], .offcanvas .nav-link[data-page]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetPage = e.currentTarget.dataset.page;
+                switchPage(targetPage);
+                // Close mobile offcanvas after clicking a link
+                const offcanvasElement = document.getElementById('mobileSidebar');
+                if (offcanvasElement) {
+                    const offcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement);
+                    if (offcanvas) offcanvas.hide();
+                }
+            });
+        });
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.page-container').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.sidebar .nav-link, .offcanvas .nav-link').forEach(l => l.classList.remove('active'));
+            document.querySelector(`.nav-link[data-page="${pageId}"]`).classList.add('active');
+        }
+
+        // --- DATATABLES INITIALIZATION ---
+        function initDataTables() {
+            const commonOptions = {
+                responsive: true,
+                language: { url: "https://cdn.datatables.net/plug-ins/1.13.7/i18n/pt-BR.json", },
+                dom: 'Bfrtip', buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+            };
+            const actionButtons = (data, type, row, storeName) => `
+                <button class="btn btn-sm btn-warning" onclick="editItem('${storeName}', ${row.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="deleteItem('${storeName}', ${row.id})"><i class="fas fa-trash"></i></button>
+            `;
+            
+            tables.alunos = $('#alunos-table').DataTable({ ...commonOptions, columns: [
+                { data: 'id' }, { data: 'nome' }, { data: 'nascimento' }, { data: 'responsavel' }, { data: 'contato' },
+                { data: null, render: (d,t,r) => actionButtons(d,t,r, 'alunos') }
+            ]});
+            tables.professores = $('#professores-table').DataTable({ ...commonOptions, columns: [
+                { data: 'id' }, { data: 'nome' }, { data: 'disciplina' }, { data: 'email' }, { data: 'contato' },
+                { data: null, render: (d,t,r) => actionButtons(d,t,r, 'professores') }
+            ]});
+            tables.matriculas = $('#matriculas-table').DataTable({ ...commonOptions, columns: [
+                { data: 'id' }, { data: 'alunoNome' }, { data: 'turmaNome' }, { data: 'data' },
+                { data: 'status', render: d => `<span class="status-ativa">${d}</span>` },
+                { data: null, render: (d,t,r) => actionButtons(d,t,r, 'matriculas') }
+            ]});
+            tables.presenca = $('#presenca-table').DataTable({ ...commonOptions, columns: [
+                { data: 'id' }, { data: 'data' }, { data: 'turmaNome' }, { data: 'presentes', render: d => d.length },
+                { data: 'ausentes', render: d => d.length },
+                { data: null, render: (d,t,r) => `<button class="btn btn-sm btn-info" onclick="viewPresencaDetails(${r.id})"><i class="fas fa-eye"></i></button>` }
+            ]});
+            tables.planosAula = $('#planosAula-table').DataTable({ ...commonOptions, columns: [
+                { data: 'id' }, { data: 'data' }, { data: 'turmaNome' }, { data: 'disciplina' }, { data: 'professorNome' },
+                { data: null, render: (d,t,r) => actionButtons(d,t,r, 'planosAula') }
+            ]});
+            tables.financeiro = $('#financeiro-table').DataTable({ ...commonOptions, columns: [
+                { data: 'id' }, { data: 'alunoNome' }, { data: 'descricao' }, { data: 'valor', render: d => `R$ ${parseFloat(d).toFixed(2)}` },
+                { data: 'dataVencimento' }, { data: 'status', render: d => `<span class="status-${d.toLowerCase()}">${d}</span>` },
+                { data: null, render: (d,t,r) => actionButtons(d,t,r, 'financeiro') }
+            ]});
+            tables.devedores = $('#devedores-table').DataTable({ ...commonOptions, columns: [
+                { data: 'alunoNome' }, { data: 'responsavel' }, { data: 'contato' },
+                { data: 'valorTotalDevido', render: d => `R$ ${parseFloat(d).toFixed(2)}` }
+            ]});
+            tables.horarios = $('#horarios-table').DataTable({ ...commonOptions, columns: [
+                { data: 'id' }, { data: 'turmaNome' }, { data: 'professorNome' }, { data: 'disciplina' },
+                { data: 'dia' }, { data: 'horario' },
+                { data: null, render: (d,t,r) => actionButtons(d,t,r, 'horarios') }
+            ]});
+            tables.relatorio = $('#relatorio-alunos-turma-table').DataTable({ ...commonOptions, columns: [
+                { title: "Nome do Aluno", data: "alunoNome" }, { title: "Nome da Turma", data: "turmaNome" }, { title: "Série", data: "turmaSerie" }
+            ]});
+        }
+
+        // --- LOAD DATA INTO TABLES ---
+        async function loadAllData() {
+            showLoading();
+            const [alunos, professores, turmas, matriculas, financeiro, planosAula, presenca, horarios] = await Promise.all([
+                getAllData(STORES.alunos), getAllData(STORES.professores), getAllData(STORES.turmas),
+                getAllData(STORES.matriculas), getAllData(STORES.financeiro), getAllData(STORES.planosAula),
+                getAllData(STORES.presenca), getAllData(STORES.horarios)
+            ]);
+            const alunoMap = createMap(alunos); const professorMap = createMap(professores); const turmaMap = createMap(turmas);
+
+            tables.alunos.clear().rows.add(alunos).draw();
+            tables.professores.clear().rows.add(professores).draw();
+            tables.matriculas.clear().rows.add(matriculas.map(m => ({...m, alunoNome: alunoMap[m.alunoId]?.nome, turmaNome: turmaMap[m.turmaId]?.nome}))).draw();
+            tables.presenca.clear().rows.add(presenca.map(p => ({...p, turmaNome: turmaMap[p.turmaId]?.nome}))).draw();
+            tables.planosAula.clear().rows.add(planosAula.map(p => ({...p, professorNome: professorMap[p.professorId]?.nome, turmaNome: turmaMap[p.turmaId]?.nome}))).draw();
+            tables.financeiro.clear().rows.add(financeiro.map(f => ({...f, alunoNome: alunoMap[f.alunoId]?.nome}))).draw();
+            tables.horarios.clear().rows.add(horarios.map(h => ({...h, professorNome: professorMap[h.professorId]?.nome, turmaNome: turmaMap[h.turmaId]?.nome}))).draw();
+            
+            loadDashboardCounts(alunos, professores, turmas);
+            loadDevedoresMap(financeiro, alunoMap);
+            loadScheduleGrid(horarios, turmaMap);
+            loadRelatorio(alunos, turmas);
+            hideLoading();
+        }
+        function createMap(arr) { return arr.reduce((map, item) => { map[item.id] = item; return map; }, {}); }
+        async function loadDashboardCounts(alunos, professores, turmas) {
+            document.getElementById('total-alunos').textContent = alunos.length;
+            document.getElementById('total-professores').textContent = professores.length;
+            document.getElementById('total-turmas').textContent = turmas.length;
+            document.getElementById('total-disciplinas').textContent = (await getAllData(STORES.disciplinas)).length;
+        }
+        async function loadDevedoresMap(lancamentos, alunoMap) {
+            const devedoresMap = {};
+            lancamentos.forEach(l => {
+                if (l.status === 'Pendente') {
+                    if (!devedoresMap[l.alunoId]) devedoresMap[l.alunoId] = { ...alunoMap[l.alunoId], valorTotalDevido: 0 };
+                    devedoresMap[l.alunoId].valorTotalDevido += parseFloat(l.valor);
+                }
+            });
+            tables.devedores.clear().rows.add(Object.values(devedoresMap)).draw();
+        }
+        function loadScheduleGrid(horarios, turmaMap) {
+            const grid = document.getElementById('schedule-grid-container');
+            grid.innerHTML = '';
+            const days = ['Horário', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+            const timeSlots = ['07:00-08:00', '08:00-09:00', '09:00-10:00', '10:00-11:00', '11:00-12:00'];
+            
+            days.forEach(day => grid.innerHTML += `<div class="schedule-grid-header">${day}</div>`);
+            timeSlots.forEach(slot => {
+                grid.innerHTML += `<div class="schedule-grid-header">${slot}</div>`;
+                for(let i=1; i<days.length; i++) {
+                    const dayName = days[i];
+                    const item = horarios.find(h => h.dia === dayName && h.horario.includes(slot.split('-')[0]));
+                    const cellContent = item ? `<div class="schedule-grid-item">${item.disciplina}<br><small>${turmaMap[item.turmaId]?.nome}</small></div>` : '';
+                    grid.innerHTML += `<div class="schedule-grid-cell">${cellContent}</div>`;
+                }
+            });
+        }
+        async function loadRelatorio(alunos, turmas) {
+            const reportData = alunos.map(aluno => {
+                const randomTurma = turmas.length > 0 ? turmas[Math.floor(Math.random() * turmas.length)] : { nome: 'Não atribuído', serie: 'N/A' };
+                return { alunoNome: aluno.nome, turmaNome: randomTurma.nome, turmaSerie: randomTurma.serie };
+            });
+            tables.relatorio.clear().rows.add(reportData).draw();
+        }
+
+        // --- MODAL & FORM HANDLERS (GENERIC) ---
+        async function openModal(modalId) {
+            document.querySelector(`#${modalId} form`).reset();
+            document.querySelector(`#${modalId} input[type="hidden"]`).value = '';
+            if (modalId === 'matriculaModal' || modalId === 'financeiroModal' || modalId === 'presencaModal' || modalId === 'planoAulaModal' || modalId === 'horarioModal') {
+                await populateDropdowns(modalId);
+            }
+        }
+        async function populateDropdowns(modalId) {
+            const alunos = await getAllData(STORES.alunos);
+            const turmas = await getAllData(STORES.turmas);
+            const professores = await getAllData(STORES.professores);
+            const populateSelect = (id, data, defaultText) => {
+                const select = document.getElementById(id);
+                select.innerHTML = `<option value="" selected disabled>${defaultText}</option>`;
+                data.forEach(item => select.innerHTML += `<option value="${item.id}">${item.nome}</option>`);
+            };
+            if (modalId === 'matriculaModal') { populateSelect('matricula-aluno', alunos, 'Selecione um aluno...'); populateSelect('matricula-turma', turmas, 'Selecione uma turma...'); }
+            if (modalId === 'financeiroModal') populateSelect('financeiro-aluno', alunos, 'Selecione um aluno...');
+            if (modalId === 'presencaModal') { populateSelect('presenca-turma', turmas, 'Selecione uma turma...'); document.getElementById('presenca-data').value = new Date().toISOString().split('T')[0]; }
+            if (modalId === 'planoAulaModal') populateSelect('planoAula-turma', turmas, 'Selecione uma turma...');
+            if (modalId === 'horarioModal') { populateSelect('horario-turma', turmas, 'Selecione uma turma...'); populateSelect('horario-professor', professores, 'Selecione um professor...'); }
+        }
+        async function loadAlunosForPresenca() {
+            const turmaId = parseInt(document.getElementById('presenca-turma').value);
+            if (!turmaId) return;
+            const matriculas = await getAllData(STORES.matriculas);
+            const alunos = await getAllData(STORES.alunos);
+            const alunoMap = createMap(alunos);
+            const listContainer = document.getElementById('presenca-alunos-list');
+            listContainer.innerHTML = '';
+            matriculas.filter(m => m.turmaId === turmaId).forEach(matricula => {
+                const aluno = alunoMap[matricula.alunoId];
+                listContainer.innerHTML += `
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="${aluno.id}" id="aluno-${aluno.id}">
+                        <label class="form-check-label" for="aluno-${aluno.id}">${aluno.nome}</label>
+                    </div>`;
+            });
+        }
+        async function saveItem(storeName) {
+            showLoading();
+            const form = document.getElementById(`${storeName.slice(0, -1)}-form`);
+            const id = form.querySelector('input[type="hidden"]').value;
+            const data = Object.fromEntries(new FormData(form).entries());
+            if (id) data.id = parseInt(id);
+            await (id ? updateData(storeName, data) : addData(storeName, data));
+            bootstrap.Modal.getInstance(form.closest('.modal')).hide();
+            showToast(`${storeName.charAt(0).toUpperCase() + storeName.slice(1)} salvo com sucesso!`);
+            loadAllData();
+        }
+        async function editItem(storeName, id) {
+            const item = await getDataById(storeName, id);
+            if (!item) return;
+            const form = document.getElementById(`${storeName.slice(0, -1)}-form`);
+            Object.keys(item).forEach(key => {
+                const el = form.querySelector(`#${storeName.slice(0, -1)}-${key}`);
+                if (el) el.value = item[key];
+            });
+            new bootstrap.Modal(form.closest('.modal')).show();
+        }
+        async function deleteItem(storeName, id) {
+            const result = await Swal.fire({ title: 'Tem certeza?', text: "Não poderá reverter!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sim, deletar!' });
+            if (result.isConfirmed) {
+                showLoading();
+                await deleteData(storeName, id);
+                showToast("Deletado com sucesso!", "success");
+                loadAllData();
+            }
+        }
+        
+        // Specific Save Functions
+        async function saveAluno() { await saveItem(STORES.alunos); }
+        async function saveProfessor() { await saveItem(STORES.professores); }
+        async function saveMatricula() {
+            showLoading();
+            const data = { alunoId: parseInt(document.getElementById('matricula-aluno').value), turmaId: parseInt(document.getElementById('matricula-turma').value), data: new Date().toISOString().split('T')[0], status: 'Ativa' };
+            await addData(STORES.matriculas, data);
+            bootstrap.Modal.getInstance(document.getElementById('matriculaModal')).hide();
+            showToast("Matrícula realizada com sucesso!");
+            loadAllData();
+        }
+        async function savePresenca() {
+            showLoading();
+            const turmaId = parseInt(document.getElementById('presenca-turma').value);
+            const data = document.getElementById('presenca-data').value;
+            const checkboxes = document.querySelectorAll('#presenca-alunos-list input:checked');
+            const presentes = Array.from(checkboxes).map(cb => parseInt(cb.value));
+            const ausentes = Array.from(document.querySelectorAll('#presenca-alunos-list input:not(:checked)')).map(cb => parseInt(cb.value));
+            await addData(STORES.presenca, { turmaId, data, presentes, ausentes });
+            bootstrap.Modal.getInstance(document.getElementById('presencaModal')).hide();
+            showToast("Presença registrada com sucesso!");
+            loadAllData();
+        }
+        async function savePlanoAula() { await saveItem(STORES.planosAula); }
+        async function saveFinanceiro() { await saveItem(STORES.financeiro); }
+        async function saveHorario() { await saveItem(STORES.horarios); }
+        
+        function viewPresencaDetails(id) {
+            // This is a placeholder for a more detailed view
+            Swal.fire('Detalhes da Presença', `Funcionalidade para ver detalhes da presença ID: ${id}`, 'info');
+        }
+
+        // --- UTILITY FUNCTIONS ---
+        function showLoading() { document.getElementById('loading-overlay').style.display = 'flex'; }
+        function hideLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
+        function showToast(message, type = 'success') {
+            Toastify({ text: message, duration: 3000, gravity: "top", position: "right", stopOnFocus: true, style: { background: type === 'success' ? "linear-gradient(to right, #00b09b, #96c93d)" : "linear-gradient(to right, #ff5f6d, #ffc371)", } }).showToast();
+        }
+        async function seedInitialData() {
+            if ((await getAllData(STORES.alunos)).length > 0) return;
+            const seedData = {
+                alunos: [{ nome: 'Ana Silva', nascimento: '2015-03-10', responsavel: 'Maria Silva', contato: '(11) 98765-4321' }, { nome: 'Bruno Costa', nascimento: '2014-07-22', responsavel: 'João Costa', contato: '(11) 91234-5678' }],
+                professores: [{ nome: 'Dr. Pedro Henrique', disciplina: 'Matemática', email: 'pedro.h@polyglot.com', contato: '(11) 97654-3210' }, { nome: 'Profa. Juliana Martins', disciplina: 'Português', email: 'juliana.m@polyglot.com', contato: '(11) 96543-2109' }],
+                turmas: [{ nome: '1º Ano A', serie: '1º Ano Ensino Fundamental', anoLetivo: 2024 }, { nome: '2º Ano B', serie: '2º Ano Ensino Fundamental', anoLetivo: 2024 }],
+                matriculas: [{ alunoId: 1, turmaId: 1, data: '2024-01-10', status: 'Ativa' }, { alunoId: 2, turmaId: 2, data: '2024-01-12', status: 'Ativa' }],
+                financeiro: [{ alunoId: 1, descricao: 'Mensalidade - Março/2024', valor: 450.00, dataVencimento: '2024-03-10', status: 'Pago' }, { alunoId: 1, descricao: 'Mensalidade - Abril/2024', valor: 450.00, dataVencimento: '2024-04-10', status: 'Pendente' }],
+                horarios: [{ turmaId: 1, professorId: 1, disciplina: 'Matemática', dia: 'Segunda', horario: '08:00 - 09:00' }, { turmaId: 1, professorId: 2, disciplina: 'Português', dia: 'Terça', horario: '08:00 - 09:00' }]
+            };
+            for (const store in seedData) { for (const item of seedData[store]) { await addData(store, item); } }
+            console.log("Initial data seeded.");
+        }
+
+        // --- INITIALIZATION ON PAGE LOAD ---
+        $(document).ready(function() {
+            initDB();
+            initDataTables();
+            // Event listeners for page loading
+            document.querySelector('[data-page="dashboard"]').addEventListener('click', loadAllData);
+            document.querySelector('[data-page="secretaria"]').addEventListener('click', loadAllData);
+            document.querySelector('[data-page="pedagogico"]').addEventListener('click', loadAllData);
+            document.querySelector('[data-page="financeiro"]').addEventListener('click', loadAllData);
+            document.querySelector('[data-page="horarios"]').addEventListener('click', loadAllData);
+            document.querySelector('[data-page="administrativo"]').addEventListener('click', loadAllData);
+        });
+    </script>
+</body>
+</html>
