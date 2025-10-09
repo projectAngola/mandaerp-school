@@ -152,6 +152,9 @@
             margin-bottom: 2rem;
             color: var(--primary-blue);
         }
+
+        .status-pendente { color: #dc3545; font-weight: bold; }
+        .status-pago { color: #198754; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -202,6 +205,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#" data-page="secretaria">
                         <i class="fas fa-school"></i> Secretaria
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-page="financeiro">
+                        <i class="fas fa-dollar-sign"></i> Financeiro
                     </a>
                 </li>
                 <li class="nav-item">
@@ -367,6 +375,57 @@
                                             <th>Email</th>
                                             <th>Contato</th>
                                             <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financeiro Page -->
+            <div id="financeiro" class="page-container">
+                <h2 class="mb-4">Gestão Financeira</h2>
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-receipt"></i> Lançamentos Financeiros</span>
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#financeiroModal" onclick="openFinanceiroModal()">
+                                    <i class="fas fa-plus"></i> Novo Lançamento
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <table id="financeiro-table" class="table table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Aluno</th>
+                                            <th>Descrição</th>
+                                            <th>Valor</th>
+                                            <th>Vencimento</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <span><i class="fas fa-exclamation-triangle"></i> Mapa de Devedores</span>
+                            </div>
+                            <div class="card-body">
+                                <table id="devedores-table" class="table table-striped table-hover" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Aluno</th>
+                                            <th>Responsável</th>
+                                            <th>Contato</th>
+                                            <th>Valor Total Devido</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -543,6 +602,52 @@
         </div>
     </div>
 
+    <!-- Modal Financeiro -->
+    <div class="modal fade" id="financeiroModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cadastrar/Editar Lançamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="financeiro-form">
+                        <input type="hidden" id="financeiro-id">
+                        <div class="mb-3">
+                            <label for="financeiro-aluno" class="form-label">Aluno</label>
+                            <select class="form-select" id="financeiro-aluno" required>
+                                <option value="" selected disabled>Selecione um aluno...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="financeiro-descricao" class="form-label">Descrição</label>
+                            <input type="text" class="form-control" id="financeiro-descricao" placeholder="Ex: Mensalidade Março/2024" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="financeiro-valor" class="form-label">Valor (R$)</label>
+                            <input type="number" class="form-control" id="financeiro-valor" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="financeiro-vencimento" class="form-label">Data de Vencimento</label>
+                            <input type="date" class="form-control" id="financeiro-vencimento" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="financeiro-status" class="form-label">Status</label>
+                            <select class="form-select" id="financeiro-status" required>
+                                <option value="Pendente">Pendente</option>
+                                <option value="Pago">Pago</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveFinanceiro()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ========= SCRIPTS ========= -->
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -567,16 +672,17 @@
         // --- GLOBAL STATE ---
         let db;
         let currentUser = null;
-        let alunosTable, professoresTable, turmasTable, disciplinasTable, relatorioTable;
+        let alunosTable, professoresTable, turmasTable, disciplinasTable, relatorioTable, financeiroTable, devedoresTable;
 
         // --- INDEXEDDB SETUP ---
         const DB_NAME = 'PolyglotAcademyDB';
-        const DB_VERSION = 1;
+        const DB_VERSION = 2; // Incremented version for new store
         const STORES = {
             alunos: 'alunos',
             professores: 'professores',
             turmas: 'turmas',
-            disciplinas: 'disciplinas'
+            disciplinas: 'disciplinas',
+            financeiro: 'financeiro'
         };
 
         function initDB() {
@@ -606,6 +712,10 @@
                 }
                 if (!db.objectStoreNames.contains(STORES.disciplinas)) {
                     db.createObjectStore(STORES.disciplinas, { keyPath: 'id', autoIncrement: true });
+                }
+                // New store for finance
+                if (!db.objectStoreNames.contains(STORES.financeiro)) {
+                    db.createObjectStore(STORES.financeiro, { keyPath: 'id', autoIncrement: true });
                 }
             };
         }
@@ -813,6 +923,40 @@
                 ]
             });
 
+            // Financeiro Table
+            financeiroTable = $('#financeiro-table').DataTable({
+                ...commonOptions,
+                columns: [
+                    { data: 'id' },
+                    { data: 'alunoNome' },
+                    { data: 'descricao' },
+                    { data: 'valor', render: data => `R$ ${parseFloat(data).toFixed(2)}` },
+                    { data: 'dataVencimento' },
+                    { 
+                        data: 'status',
+                        render: data => `<span class="status-${data.toLowerCase()}">${data}</span>`
+                    },
+                    {
+                        data: null,
+                        render: (data, type, row) => `
+                            <button class="btn btn-sm btn-warning" onclick="editFinanceiro(${row.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteFinanceiro(${row.id})"><i class="fas fa-trash"></i></button>
+                        `
+                    }
+                ]
+            });
+
+            // Devedores Table
+            devedoresTable = $('#devedores-table').DataTable({
+                ...commonOptions,
+                columns: [
+                    { data: 'alunoNome' },
+                    { data: 'responsavel' },
+                    { data: 'contato' },
+                    { data: 'valorTotalDevido', render: data => `R$ ${parseFloat(data).toFixed(2)}` }
+                ]
+            });
+
             // Relatorio Table
             relatorioTable = $('#relatorio-alunos-turma-table').DataTable({
                 ...commonOptions,
@@ -868,6 +1012,42 @@
             });
 
             relatorioTable.clear().rows.add(reportData).draw();
+        }
+        async function loadFinanceiro() {
+            const lancamentos = await getAllData(STORES.financeiro);
+            const alunos = await getAllData(STORES.alunos);
+            const alunoMap = alunos.reduce((map, aluno) => { map[aluno.id] = aluno.nome; return map; }, {});
+
+            const dataWithAlunoNames = lancamentos.map(lancamento => ({
+                ...lancamento,
+                alunoNome: alunoMap[lancamento.alunoId] || 'Aluno não encontrado'
+            }));
+
+            financeiroTable.clear().rows.add(dataWithAlunoNames).draw();
+        }
+        async function loadDevedoresMap() {
+            const lancamentos = await getAllData(STORES.financeiro);
+            const alunos = await getAllData(STORES.alunos);
+            const alunoMap = alunos.reduce((map, aluno) => { map[aluno.id] = aluno; return map; }, {});
+            
+            const devedoresMap = {};
+
+            lancamentos.forEach(lancamento => {
+                if (lancamento.status === 'Pendente') {
+                    if (!devedoresMap[lancamento.alunoId]) {
+                        devedoresMap[lancamento.alunoId] = {
+                            alunoNome: alunoMap[lancamento.alunoId]?.nome || 'N/A',
+                            responsavel: alunoMap[lancamento.alunoId]?.responsavel || 'N/A',
+                            contato: alunoMap[lancamento.alunoId]?.contato || 'N/A',
+                            valorTotalDevido: 0
+                        };
+                    }
+                    devedoresMap[lancamento.alunoId].valorTotalDevido += parseFloat(lancamento.valor);
+                }
+            });
+
+            const devedoresList = Object.values(devedoresMap);
+            devedoresTable.clear().rows.add(devedoresList).draw();
         }
 
 
@@ -1084,6 +1264,76 @@
                 loadDashboardCounts();
             }
         }
+        
+        // --- MODAL & FORM HANDLERS (FINANCEIRO) ---
+        async function openFinanceiroModal() {
+            document.getElementById('financeiro-form').reset();
+            document.getElementById('financeiro-id').value = '';
+            await populateAlunoDropdown();
+        }
+        async function populateAlunoDropdown() {
+            const alunos = await getAllData(STORES.alunos);
+            const select = document.getElementById('financeiro-aluno');
+            select.innerHTML = '<option value="" selected disabled>Selecione um aluno...</option>';
+            alunos.forEach(aluno => {
+                const option = document.createElement('option');
+                option.value = aluno.id;
+                option.textContent = aluno.nome;
+                select.appendChild(option);
+            });
+        }
+        async function editFinanceiro(id) {
+            const lancamento = await getDataById(STORES.financeiro, id);
+            if (lancamento) {
+                await populateAlunoDropdown();
+                document.getElementById('financeiro-id').value = lancamento.id;
+                document.getElementById('financeiro-aluno').value = lancamento.alunoId;
+                document.getElementById('financeiro-descricao').value = lancamento.descricao;
+                document.getElementById('financeiro-valor').value = lancamento.valor;
+                document.getElementById('financeiro-vencimento').value = lancamento.dataVencimento;
+                document.getElementById('financeiro-status').value = lancamento.status;
+                new bootstrap.Modal(document.getElementById('financeiroModal')).show();
+            }
+        }
+        async function saveFinanceiro() {
+            const id = document.getElementById('financeiro-id').value;
+            const financeiroData = {
+                alunoId: parseInt(document.getElementById('financeiro-aluno').value),
+                descricao: document.getElementById('financeiro-descricao').value,
+                valor: document.getElementById('financeiro-valor').value,
+                dataVencimento: document.getElementById('financeiro-vencimento').value,
+                status: document.getElementById('financeiro-status').value,
+            };
+            if (id) {
+                financeiroData.id = parseInt(id);
+                await updateData(STORES.financeiro, financeiroData);
+                showToast("Lançamento atualizado com sucesso!");
+            } else {
+                await addData(STORES.financeiro, financeiroData);
+                showToast("Lançamento cadastrado com sucesso!");
+            }
+            bootstrap.Modal.getInstance(document.getElementById('financeiroModal')).hide();
+            loadFinanceiro();
+            loadDevedoresMap();
+        }
+        async function deleteFinanceiro(id) {
+            const result = await Swal.fire({
+                title: 'Tem certeza?',
+                text: "Você não poderá reverter isso!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, deletar!'
+            });
+            if (result.isConfirmed) {
+                await deleteData(STORES.financeiro, id);
+                showToast("Lançamento deletado com sucesso!", "success");
+                loadFinanceiro();
+                loadDevedoresMap();
+            }
+        }
+
 
         // --- UTILITY FUNCTIONS ---
         function showToast(message, type = 'success') {
@@ -1122,6 +1372,12 @@
                     { nome: 'Português', cargaHoraria: 200 },
                     { nome: 'História', cargaHoraria: 100 },
                     { nome: 'Geografia', cargaHoraria: 100 },
+                ],
+                financeiro: [ // New seed data
+                    { alunoId: 1, descricao: 'Mensalidade - Março/2024', valor: 450.00, dataVencimento: '2024-03-10', status: 'Pago' },
+                    { alunoId: 1, descricao: 'Mensalidade - Abril/2024', valor: 450.00, dataVencimento: '2024-04-10', status: 'Pendente' },
+                    { alunoId: 2, descricao: 'Mensalidade - Março/2024', valor: 450.00, dataVencimento: '2024-03-10', status: 'Pendente' },
+                    { alunoId: 3, descricao: 'Material Didático', valor: 120.00, dataVencimento: '2024-02-15', status: 'Pago' },
                 ]
             };
 
@@ -1142,6 +1398,7 @@
             document.querySelector('[data-page="dashboard"]').addEventListener('click', loadDashboardCounts);
             document.querySelector('[data-page="secretaria"]').addEventListener('click', () => { loadAlunos(); loadProfessores(); });
             document.querySelector('[data-page="pedagogico"]').addEventListener('click', () => { loadTurmas(); loadDisciplinas(); });
+            document.querySelector('[data-page="financeiro"]').addEventListener('click', () => { loadFinanceiro(); loadDevedoresMap(); });
             document.querySelector('[data-page="administrativo"]').addEventListener('click', loadRelatorio);
         });
     </script>
